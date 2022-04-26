@@ -1,7 +1,6 @@
 package it.polito.tdp.poweroutages.model;
 
 public class Nerc {
-
 	
 	private int id;
 	private String value;

@@ -5,9 +5,11 @@
 package it.polito.tdp.poweroutages;
 
 import java.net.URL;
+import java.util.*;
 import java.util.ResourceBundle;
 import it.polito.tdp.poweroutages.model.Model;
 import it.polito.tdp.poweroutages.model.Nerc;
+import it.polito.tdp.poweroutages.model.Poweroutages;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
@@ -39,6 +41,30 @@ public class FXMLController {
     @FXML
     void doRun(ActionEvent event) {
     	txtResult.clear();
+    	// System.out.print(cmbNerc.getValue().getId()); --> permette di accedere all'id dell'elemento selezionato
+    	String ore = txtHours.getText();
+    	String anni = txtYears.getText();
+    	
+    	if(cmbNerc.getValue() != null && ore != "" && anni != "") {
+    		String nercValue = cmbNerc.getValue().getValue(); // La classe Nerc ha come attributi int id e String value, quindi per prendere il
+															  // valore dalla combobox devo accedere al getValue che mi restituisce un oggetto
+															  // Nerc e poi accedo al suo getValue per ottenere il campo String
+    		List<Poweroutages> listaBlackout = model.trova_eventi(nercValue, new LinkedList<Poweroutages>(),Integer.parseInt(anni), Integer.parseInt(ore));
+    		int cntPersone = 0;
+    		int cntOre = 0;
+    		for(Poweroutages poweroutages : listaBlackout) {
+    			cntPersone += poweroutages.getPersoneCoinvolte();
+    			cntOre += poweroutages.getOreDisservizio();
+    		}
+    		
+    		txtResult.appendText("Tot people affected: " + cntPersone + "\nTot hours of outages: " + cntOre + "\n");
+    		for(Poweroutages poweroutages : listaBlackout) {
+    			txtResult.appendText(poweroutages + "\n");
+    		}
+    	}
+    	else {
+    		txtResult.setText("Completare tutti i campi");
+    	}
     }
 
     @FXML // This method is called by the FXMLLoader when initialization is complete
@@ -54,5 +80,10 @@ public class FXMLController {
     
     public void setModel(Model model) {
     	this.model = model;
+    	
+    	for(Nerc cNerc : model.getNercList()) {
+    		cmbNerc.getItems().add(cNerc);
+    		
+    	}
     }
 }
